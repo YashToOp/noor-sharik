@@ -6,6 +6,7 @@ import '../core/theme.dart';
 import '../data/models.dart';
 import '../data/sharik_repository.dart';
 import '../widgets/common.dart';
+import '../widgets/garment.dart';
 import 'orders_inbox_screen.dart';
 import 'update_production_screen.dart';
 
@@ -146,22 +147,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     return ListView(
       padding: const EdgeInsets.all(NoorSpacing.md),
       children: [
-        // Style block — the photograph, standing in as colour for the demo.
-        Container(
-          height: 180,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(NoorRadius.lg),
-            gradient: LinearGradient(
-              colors: line == null
-                  ? [NoorColors.greySoft, NoorColors.grey]
-                  : [
-                      line.colour,
-                      Color.lerp(line.colour, Colors.black, 0.45)!,
-                    ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
+        // Style block — the garment itself, in the first colourway. A real
+        // photograph would come from media_assets once the camera exists.
+        GarmentTile(
+          kind: line == null
+              ? GarmentKind.fabric
+              : garmentFor(line.styleName, line.styleCode),
+          colour: line?.colour ?? NoorColors.grey,
+          width: double.infinity,
+          height: 240,
+          radius: NoorRadius.lg,
         ),
         const SizedBox(height: NoorSpacing.md),
         Text(line?.styleName ?? order.number, style: NoorText.hero.copyWith(fontSize: 30)),
@@ -188,11 +183,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 width: 84,
                 child: Column(
                   children: [
-                    ColourBlock(
-                      colours: [
-                        l.colour,
-                        Color.lerp(l.colour, Colors.black, 0.3)!,
-                      ],
+                    GarmentTile(
+                      kind: garmentFor(l.styleName, l.styleCode),
+                      colour: l.colour,
                       size: 84,
                     ),
                     const SizedBox(height: 6),

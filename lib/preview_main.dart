@@ -36,6 +36,9 @@ OrderLine _line({
   required int pcs,
   required int packs,
   required double unitPrice,
+  String fabric = 'Washed linen',
+  String composition = '55% linen · 45% viscose',
+  int gsm = 210,
 }) => OrderLine(
   id: id,
   pcs: pcs,
@@ -44,9 +47,9 @@ OrderLine _line({
   lineTotal: pcs * unitPrice,
   styleCode: styleCode,
   styleName: styleName,
-  fabric: 'Washed linen',
-  composition: '55% linen · 45% viscose',
-  gsm: 210,
+  fabric: fabric,
+  composition: composition,
+  gsm: gsm,
   colourwayName: colourwayName,
   hex: hex,
   ratio: _ratio,
@@ -121,6 +124,48 @@ final _running = SellerOrder(
   ],
 );
 
+/// Not in noor-demo — the seeded catalogue is skirts, dresses and abayas.
+/// Here so the garment drawing can be reviewed on trousers too.
+final _denim = SellerOrder(
+  id: 'preview-denim',
+  number: 'NT-2026-0171-A',
+  status: 'released',
+  total: 9400,
+  currency: 'USD',
+  promisedShipDate: DateTime(2026, 10, 12),
+  expectedArrivalDate: DateTime(2026, 10, 28),
+  leadTimeDays: 42,
+  updatedAt: DateTime(2026, 8, 19),
+  lines: [
+    _line(
+      id: 'l5',
+      styleCode: 'J-2204',
+      styleName: 'Straight Leg Jeans',
+      colourwayName: 'Indigo',
+      hex: '#2E4272',
+      pcs: 700,
+      packs: 70,
+      unitPrice: 11.60,
+      fabric: 'Rigid denim',
+      composition: '100% cotton',
+      gsm: 340,
+    ),
+    _line(
+      id: 'l6',
+      styleCode: 'J-2204',
+      styleName: 'Straight Leg Jeans',
+      colourwayName: 'Stone Wash',
+      hex: '#8FA0B8',
+      pcs: 500,
+      packs: 50,
+      unitPrice: 11.60,
+      fabric: 'Rigid denim',
+      composition: '100% cotton',
+      gsm: 340,
+    ),
+  ],
+);
+
 ProductionStep _step({
   required int sort,
   required String name,
@@ -177,7 +222,7 @@ final _ladder = <ProductionStep>[
 class PreviewRepository extends SharikRepository {
   PreviewRepository() : super(SupabaseClient('https://preview.invalid', 'none'));
 
-  final List<SellerOrder> _orders = [_released, _running];
+  final List<SellerOrder> _orders = [_released, _denim, _running];
 
   @override
   Future<List<House>> houses() async => const [_zubair];

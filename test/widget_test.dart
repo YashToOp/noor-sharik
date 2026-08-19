@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:noor_sharik/core/supabase_config.dart';
 import 'package:noor_sharik/data/models.dart';
 import 'package:noor_sharik/data/sharik_repository.dart';
+import 'package:noor_sharik/widgets/garment.dart';
 
 Map<String, dynamic> _orderMap({
   String status = 'released',
@@ -206,6 +207,39 @@ void main() {
 
     test('an empty ladder does not crash', () {
       expect(SharikRepository.actionableStep(const []), isNull);
+    });
+  });
+
+  group('garment shapes are picked from the style name', () {
+    test('the seeded catalogue maps to sensible shapes', () {
+      expect(garmentFor('Navy Linen Skirt', 'D-4471'), GarmentKind.skirt);
+      expect(garmentFor('Pleated Maxi Skirt', 'D-4463'), GarmentKind.pleatedSkirt);
+      expect(garmentFor('Linen Wrap Dress', 'D-4482'), GarmentKind.dress);
+      expect(garmentFor('Classic Crepe Abaya', 'A-2210'), GarmentKind.abaya);
+      expect(garmentFor('Chiffon Blouse', 'H-3315'), GarmentKind.blouse);
+      expect(garmentFor('Kids Eid Kaftan', 'J-1120'), GarmentKind.kaftan);
+      expect(garmentFor('Jersey Everyday Set', 'J-1104'), GarmentKind.set);
+    });
+
+    test('trousers in any wording become jeans', () {
+      for (final name in const [
+        'Straight Leg Jeans',
+        'Rigid Denim Trouser',
+        'Wide Pant',
+        'Stretch Chino',
+      ]) {
+        expect(garmentFor(name), GarmentKind.jeans, reason: name);
+      }
+    });
+
+    test('pleated wins over plain skirt, and jeans over everything', () {
+      expect(garmentFor('PLEATED SKIRT'), GarmentKind.pleatedSkirt);
+      expect(garmentFor('Denim Skirt'), GarmentKind.jeans);
+    });
+
+    test('an unknown style falls back to cloth rather than throwing', () {
+      expect(garmentFor(''), GarmentKind.fabric);
+      expect(garmentFor('Mystery Item', 'X-1'), GarmentKind.fabric);
     });
   });
 }

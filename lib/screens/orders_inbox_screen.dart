@@ -6,6 +6,7 @@ import '../core/theme.dart';
 import '../data/models.dart';
 import '../data/sharik_repository.dart';
 import '../widgets/common.dart';
+import '../widgets/garment.dart';
 import 'order_detail_screen.dart';
 
 /// Screen 02 — the inbox.
@@ -424,11 +425,9 @@ class OrderCard extends StatelessWidget {
                         padding: const EdgeInsets.only(right: NoorSpacing.sm),
                         child: Column(
                           children: [
-                            ColourBlock(
-                              colours: [
-                                line.colour,
-                                Color.lerp(line.colour, Colors.black, 0.28)!,
-                              ],
+                            GarmentTile(
+                              kind: garmentFor(line.styleName, line.styleCode),
+                              colour: line.colour,
                               size: 62,
                             ),
                             const SizedBox(height: 5),

@@ -77,6 +77,10 @@ ThemeData buildNoorTheme({String? fontFamily}) {
         fontFamily: fontFamily,
       ),
     ),
+    dialogTheme: const DialogThemeData(
+      backgroundColor: NoorColors.card,
+      surfaceTintColor: Colors.transparent,
+    ),
     tabBarTheme: TabBarThemeData(
       labelStyle: TextStyle(
         fontWeight: FontWeight.w700,

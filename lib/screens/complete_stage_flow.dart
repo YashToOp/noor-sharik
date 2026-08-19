@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../core/theme.dart';
 import '../data/models.dart';
 import '../widgets/common.dart';
+import '../widgets/garment.dart';
 
 /// What the seller produced at this stage: the quantity and the two colour
 /// blocks standing in for his photographs.
@@ -31,18 +32,24 @@ class CompleteStageFlow extends StatefulWidget {
 class _CompleteStageFlowState extends State<CompleteStageFlow> {
   final List<String> _picked = [];
 
-  /// Stand-ins for the camera: the order's own colourways first, then the
-  /// tones of a factory floor.
-  List<String> get _palette {
-    final fromOrder = widget.order.lines
-        .map((l) => l.hex.toUpperCase())
-        .toSet()
-        .toList();
+  /// Stand-ins for the camera. The order's own colourways come first and show
+  /// the garment he is making; the rest are the tones of a factory floor.
+  late final List<_Shot> _palette = _buildPalette();
+
+  List<_Shot> _buildPalette() {
+    final seen = <String>{};
+    final shots = <_Shot>[];
+    for (final l in widget.order.lines) {
+      final hex = l.hex.toUpperCase();
+      if (!seen.add(hex)) continue;
+      shots.add(_Shot(hex, garmentFor(l.styleName, l.styleCode)));
+    }
     const floor = [
       '#8A6F4D', '#5C4A33', '#B9AE99', '#3C4043',
       '#D8CDB6', '#6E7B6A', '#2B2F33', '#A8925F',
     ];
-    return [...fromOrder, ...floor];
+    shots.addAll(floor.map((h) => _Shot(h, null)));
+    return shots;
   }
 
   void _pick(String hex) {
@@ -98,11 +105,11 @@ class _CompleteStageFlowState extends State<CompleteStageFlow> {
               mainAxisSpacing: NoorSpacing.md,
               crossAxisSpacing: NoorSpacing.md,
               children: [
-                for (final hex in _palette)
+                for (final shot in _palette)
                   _PickTile(
-                    hex: hex,
-                    index: _picked.indexOf(hex),
-                    onTap: () => _pick(hex),
+                    shot: shot,
+                    index: _picked.indexOf(shot.hex),
+                    onTap: () => _pick(shot.hex),
                   ),
               ],
             ),
@@ -144,34 +151,55 @@ class _CompleteStageFlowState extends State<CompleteStageFlow> {
   }
 }
 
+/// One tappable photo: either the garment in a colourway, or a floor tone.
+class _Shot {
+  const _Shot(this.hex, this.garment);
+  final String hex;
+  final GarmentKind? garment;
+}
+
 class _PickTile extends StatelessWidget {
   const _PickTile({
-    required this.hex,
+    required this.shot,
     required this.index,
     required this.onTap,
   });
 
-  final String hex;
+  final _Shot shot;
   final int index;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final base = _colour(hex);
+    final base = _colour(shot.hex);
     final selected = index >= 0;
+    final garment = shot.garment;
     return GestureDetector(
       onTap: onTap,
       child: Stack(
         fit: StackFit.expand,
         children: [
+          if (garment != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(NoorRadius.md),
+              child: CustomPaint(
+                painter: GarmentPainter(kind: garment, colour: base),
+              ),
+            )
+          else
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(NoorRadius.md),
+                gradient: LinearGradient(
+                  colors: [base, Color.lerp(base, Colors.black, 0.4)!],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+            ),
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(NoorRadius.md),
-              gradient: LinearGradient(
-                colors: [base, Color.lerp(base, Colors.black, 0.4)!],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
               border: Border.all(
                 color: selected ? NoorColors.gold : Colors.transparent,
                 width: 4,
