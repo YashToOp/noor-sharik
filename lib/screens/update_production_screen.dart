@@ -14,16 +14,24 @@ import 'complete_stage_flow.dart';
 /// it gets the gold panel and one enormous button. That write is what makes the
 /// client's timeline move.
 class UpdateProductionScreen extends StatefulWidget {
-  const UpdateProductionScreen({super.key, required this.order});
+  const UpdateProductionScreen({
+    super.key,
+    required this.order,
+    this.repository,
+  });
 
   final SellerOrder order;
+
+  /// Injectable so the screen can be rendered from fixtures.
+  final SharikRepository? repository;
 
   @override
   State<UpdateProductionScreen> createState() => _UpdateProductionScreenState();
 }
 
 class _UpdateProductionScreenState extends State<UpdateProductionScreen> {
-  late final SharikRepository _repo = SharikRepository(Supabase.instance.client);
+  late final SharikRepository _repo =
+      widget.repository ?? SharikRepository(Supabase.instance.client);
   RealtimeChannel? _channel;
 
   List<ProductionStep> _steps = const [];

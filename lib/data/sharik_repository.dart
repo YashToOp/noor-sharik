@@ -210,7 +210,7 @@ class SharikRepository {
 
   /// A new order must appear on its own, with a sound, the moment QC releases
   /// it. Filtered to this house — never the whole table.
-  RealtimeChannel subscribeOrders({
+  RealtimeChannel? subscribeOrders({
     required String houseId,
     required void Function() onChange,
   }) {
@@ -230,7 +230,7 @@ class SharikRepository {
         .subscribe();
   }
 
-  RealtimeChannel subscribeSteps({
+  RealtimeChannel? subscribeSteps({
     required String orderId,
     required void Function() onChange,
   }) {

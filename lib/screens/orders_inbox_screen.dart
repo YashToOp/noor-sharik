@@ -13,9 +13,16 @@ import 'order_detail_screen.dart';
 /// Three tabs driven by colour. A new order must arrive on its own, with a
 /// sound, the moment QC approves the gate.
 class OrdersInboxScreen extends StatefulWidget {
-  const OrdersInboxScreen({super.key, required this.house});
+  const OrdersInboxScreen({
+    super.key,
+    required this.house,
+    this.repository,
+  });
 
   final House house;
+
+  /// Injectable so the screen can be rendered from fixtures.
+  final SharikRepository? repository;
 
   @override
   State<OrdersInboxScreen> createState() => _OrdersInboxScreenState();
@@ -23,7 +30,8 @@ class OrdersInboxScreen extends StatefulWidget {
 
 class _OrdersInboxScreenState extends State<OrdersInboxScreen>
     with SingleTickerProviderStateMixin {
-  late final SharikRepository _repo = SharikRepository(Supabase.instance.client);
+  late final SharikRepository _repo =
+      widget.repository ?? SharikRepository(Supabase.instance.client);
   late final TabController _tabs = TabController(length: 3, vsync: this);
   RealtimeChannel? _channel;
 
@@ -125,7 +133,6 @@ class _OrdersInboxScreenState extends State<OrdersInboxScreen>
           indicatorSize: TabBarIndicatorSize.tab,
           indicatorWeight: 3,
           indicatorColor: NoorColors.amber,
-          labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
           tabs: [
             _CountTab(label: 'New', count: _new.length, colour: NoorColors.amber),
             _CountTab(
@@ -153,6 +160,7 @@ class _OrdersInboxScreenState extends State<OrdersInboxScreen>
                       fresh: _freshIds,
                       house: widget.house,
                       accent: NoorColors.amber,
+                      repository: _repo,
                       showActions: true,
                       onChanged: _load,
                       empty: const EmptyState(
@@ -168,6 +176,7 @@ class _OrdersInboxScreenState extends State<OrdersInboxScreen>
                       fresh: _freshIds,
                       house: widget.house,
                       accent: NoorColors.green,
+                      repository: _repo,
                       showActions: false,
                       onChanged: _load,
                       empty: const EmptyState(
@@ -181,6 +190,7 @@ class _OrdersInboxScreenState extends State<OrdersInboxScreen>
                       fresh: _freshIds,
                       house: widget.house,
                       accent: NoorColors.grey,
+                      repository: _repo,
                       showActions: false,
                       onChanged: _load,
                       empty: const EmptyState(
@@ -250,6 +260,7 @@ class _OrderList extends StatelessWidget {
     required this.showActions,
     required this.onChanged,
     required this.empty,
+    required this.repository,
   });
 
   final List<SellerOrder> orders;
@@ -259,6 +270,7 @@ class _OrderList extends StatelessWidget {
   final bool showActions;
   final Future<void> Function() onChanged;
   final Widget empty;
+  final SharikRepository? repository;
 
   @override
   Widget build(BuildContext context) {
@@ -281,6 +293,7 @@ class _OrderList extends StatelessWidget {
         itemBuilder: (context, i) => OrderCard(
           order: orders[i],
           house: house,
+          repository: repository,
           accent: accent,
           isFresh: fresh.contains(orders[i].id),
           showActions: showActions,
@@ -301,10 +314,12 @@ class OrderCard extends StatelessWidget {
     required this.isFresh,
     required this.showActions,
     required this.onChanged,
+    this.repository,
   });
 
   final SellerOrder order;
   final House house;
+  final SharikRepository? repository;
   final Color accent;
   final bool isFresh;
   final bool showActions;
@@ -313,7 +328,11 @@ class OrderCard extends StatelessWidget {
   Future<void> _open(BuildContext context) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => OrderDetailScreen(orderId: order.id, house: house),
+        builder: (_) => OrderDetailScreen(
+          orderId: order.id,
+          house: house,
+          repository: repository,
+        ),
       ),
     );
     await onChanged();
@@ -327,7 +346,9 @@ class OrderCard extends StatelessWidget {
     );
     if (confirmed != true) return;
     try {
-      await SharikRepository(Supabase.instance.client).acceptOrder(order.id);
+      final repo =
+          repository ?? SharikRepository(Supabase.instance.client);
+      await repo.acceptOrder(order.id);
       HapticFeedback.mediumImpact();
       messenger.showSnackBar(
         SnackBar(

@@ -18,17 +18,22 @@ class OrderDetailScreen extends StatefulWidget {
     super.key,
     required this.orderId,
     required this.house,
+    this.repository,
   });
 
   final String orderId;
   final House house;
+
+  /// Injectable so the screen can be rendered from fixtures.
+  final SharikRepository? repository;
 
   @override
   State<OrderDetailScreen> createState() => _OrderDetailScreenState();
 }
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
-  late final SharikRepository _repo = SharikRepository(Supabase.instance.client);
+  late final SharikRepository _repo =
+      widget.repository ?? SharikRepository(Supabase.instance.client);
   SellerOrder? _order;
   bool _loading = true;
   bool _failed = false;
@@ -390,7 +395,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               onPressed: () async {
                 await Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => UpdateProductionScreen(order: order),
+                    builder: (_) => UpdateProductionScreen(
+                      order: order,
+                      repository: widget.repository,
+                    ),
                   ),
                 );
                 await _load();

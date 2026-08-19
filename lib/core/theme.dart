@@ -53,7 +53,9 @@ class NoorRadius {
   static const double lg = 20;
 }
 
-ThemeData buildNoorTheme() {
+/// [fontFamily] exists for the fixture preview, which runs where Roboto is not
+/// available. Production leaves it null and uses the platform font.
+ThemeData buildNoorTheme({String? fontFamily}) {
   final base = ThemeData.light(useMaterial3: true);
   return base.copyWith(
     scaffoldBackgroundColor: NoorColors.paper,
@@ -63,7 +65,7 @@ ThemeData buildNoorTheme() {
       surface: NoorColors.card,
       error: NoorColors.danger,
     ),
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
       backgroundColor: NoorColors.paper,
       foregroundColor: NoorColors.ink,
       elevation: 0,
@@ -72,11 +74,25 @@ ThemeData buildNoorTheme() {
         color: NoorColors.ink,
         fontSize: 22,
         fontWeight: FontWeight.w700,
+        fontFamily: fontFamily,
+      ),
+    ),
+    tabBarTheme: TabBarThemeData(
+      labelStyle: TextStyle(
+        fontWeight: FontWeight.w700,
+        fontSize: 14,
+        fontFamily: fontFamily,
+      ),
+      unselectedLabelStyle: TextStyle(
+        fontWeight: FontWeight.w700,
+        fontSize: 14,
+        fontFamily: fontFamily,
       ),
     ),
     textTheme: base.textTheme.apply(
       bodyColor: NoorColors.ink,
       displayColor: NoorColors.ink,
+      fontFamily: fontFamily,
     ),
     dividerColor: NoorColors.hairline,
   );

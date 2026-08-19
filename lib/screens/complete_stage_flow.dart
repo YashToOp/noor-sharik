@@ -313,6 +313,9 @@ class _QuantityScreenState extends State<_QuantityScreen> {
                       selected: _qty == c,
                       showCheckmark: false,
                       selectedColor: NoorColors.forest,
+                      backgroundColor: NoorColors.card,
+                      surfaceTintColor: Colors.transparent,
+                      side: const BorderSide(color: NoorColors.hairline),
                       labelStyle: TextStyle(
                         fontWeight: FontWeight.w700,
                         color: _qty == c ? Colors.white : NoorColors.ink,
