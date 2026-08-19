@@ -184,9 +184,31 @@ Not built yet: raise-a-problem grid, my articles, stock, payments, my score.
 
 ## Known limitation of this build
 
-The Android SDK and the Supabase host are both blocked by this container's
-egress policy, so the APK has not been compiled and the app has not been run
-against the live database from here. What was verified: `flutter analyze` clean,
-12 tests green, every PostgREST embed backed by a real foreign key, and the
-accept and stage-completion writes executed directly against `noor-demo`.
-Build the APK and run the three surfaces side by side before the demo.
+**The APK has not been compiled**, and the app has not been run against the live
+database, because the build container's egress policy blocks two hosts:
+
+| Host | Effect |
+|---|---|
+| `dl.google.com` | no Android Gradle Plugin, no androidx — **blocks the APK** |
+| `*.supabase.co` | the app cannot reach the database from the container |
+
+Everything else needed is reachable and was put in place: Flutter 3.35.1, the
+Gradle distribution, Maven Central, an API 35 `android.jar`, and Ubuntu's
+build-tools assembled into an SDK at `/opt/android-sdk`. The build then fails
+resolving `com.android.application:8.9.1`, because `google()` points at
+`dl.google.com/dl/android/maven2` and `maven.google.com` is only a redirect to
+the same blocked host. AGP and androidx are not published to Maven Central, so
+there is no legitimate second source.
+
+On any machine with normal network access there is nothing to work around:
+
+```bash
+flutter pub get
+flutter build apk --release      # build/app/outputs/flutter-apk/app-release.apk
+```
+
+What *was* verified here: `flutter analyze` clean, 12 tests green, every
+PostgREST embed backed by a real foreign key, and the accept and
+stage-completion writes executed directly against `noor-demo` (see the wiring
+test above). Build the APK and run the three surfaces side by side before the
+demo.
