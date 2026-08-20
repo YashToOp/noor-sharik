@@ -16,7 +16,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/theme.dart';
 import 'data/models.dart';
 import 'data/sharik_repository.dart';
-import 'screens/orders_inbox_screen.dart';
+import 'screens/role_picker_screen.dart';
 
 const _zubair = House(
   id: '40000000-0000-4000-a000-000000000001',
@@ -24,6 +24,29 @@ const _zubair = House(
   name: 'Zubair Garments',
   city: "Sana'a",
 );
+
+/// The other seeded houses, so the picker looks like the real thing.
+const _houses = [
+  _zubair,
+  House(
+    id: '40000000-0000-4000-a000-000000000002',
+    code: 'DAK',
+    name: 'Dar Al-Khuyut',
+    city: 'Aden',
+  ),
+  House(
+    id: '40000000-0000-4000-a000-000000000003',
+    code: 'BH',
+    name: 'Bayt Al-Hareer',
+    city: 'Taiz',
+  ),
+  House(
+    id: '40000000-0000-4000-a000-000000000004',
+    code: 'IMH',
+    name: 'Ibb Modest House',
+    city: 'Ibb',
+  ),
+];
 
 const _ratio = {'S': 2, 'M': 3, 'L': 3, 'XL': 2};
 
@@ -224,7 +247,7 @@ class PreviewRepository extends SharikRepository {
   final List<SellerOrder> _orders = [_released, _denim, _running];
 
   @override
-  Future<List<House>> houses() async => const [_zubair];
+  Future<List<House>> houses() async => _houses;
 
   @override
   Future<List<SellerOrder>> orders(String houseId) async => _orders;
@@ -271,7 +294,7 @@ void main() {
       theme: buildNoorTheme(
         fontFamily: _previewFont.isEmpty ? null : _previewFont,
       ),
-      home: OrdersInboxScreen(house: _zubair, repository: PreviewRepository()),
+      home: RolePickerScreen(repository: PreviewRepository()),
     ),
   );
 }

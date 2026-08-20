@@ -12,7 +12,10 @@ import 'orders_inbox_screen.dart';
 /// Client and QC are listed because all three surfaces share one system; they
 /// live in Noor Majlis and the QC dashboard, not here.
 class RolePickerScreen extends StatelessWidget {
-  const RolePickerScreen({super.key});
+  const RolePickerScreen({super.key, this.repository});
+
+  /// Injectable so the whole flow can be rendered from fixtures.
+  final SharikRepository? repository;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +50,9 @@ class RolePickerScreen extends StatelessWidget {
                 colour: NoorColors.forest,
                 enabled: true,
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const _HousePickerScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => _HousePickerScreen(repository: repository),
+                  ),
                 ),
               ),
               const SizedBox(height: NoorSpacing.sm),
@@ -149,14 +154,17 @@ class _RoleTile extends StatelessWidget {
 }
 
 class _HousePickerScreen extends StatefulWidget {
-  const _HousePickerScreen();
+  const _HousePickerScreen({this.repository});
+
+  final SharikRepository? repository;
 
   @override
   State<_HousePickerScreen> createState() => _HousePickerScreenState();
 }
 
 class _HousePickerScreenState extends State<_HousePickerScreen> {
-  late final SharikRepository _repo = SharikRepository(Supabase.instance.client);
+  late final SharikRepository _repo =
+      widget.repository ?? SharikRepository(Supabase.instance.client);
   late Future<List<House>> _future = _repo.houses();
 
   @override
@@ -190,7 +198,10 @@ class _HousePickerScreenState extends State<_HousePickerScreen> {
               return NoorCard(
                 onTap: () => Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
-                    builder: (_) => OrdersInboxScreen(house: h),
+                    builder: (_) => OrdersInboxScreen(
+                      house: h,
+                      repository: widget.repository,
+                    ),
                   ),
                 ),
                 child: Row(

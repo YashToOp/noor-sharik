@@ -50,12 +50,26 @@ class _OrdersInboxScreenState extends State<OrdersInboxScreen>
       houseId: widget.house.id,
       onChange: () => _load(),
     );
+    // the indicator follows the tab's own colour, so the screen stays read
+    // by colour rather than by label
+    _tabs.addListener(_onTabChanged);
   }
+
+  void _onTabChanged() {
+    if (mounted) setState(() {});
+  }
+
+  Color get _tabColour => switch (_tabs.index) {
+    0 => NoorColors.amber,
+    1 => NoorColors.green,
+    _ => NoorColors.grey,
+  };
 
   @override
   void dispose() {
     final ch = _channel;
     if (ch != null) Supabase.instance.client.removeChannel(ch);
+    _tabs.removeListener(_onTabChanged);
     _tabs.dispose();
     super.dispose();
   }
@@ -133,7 +147,7 @@ class _OrdersInboxScreenState extends State<OrdersInboxScreen>
           unselectedLabelColor: NoorColors.inkFaint,
           indicatorSize: TabBarIndicatorSize.tab,
           indicatorWeight: 3,
-          indicatorColor: NoorColors.amber,
+          indicatorColor: _tabColour,
           tabs: [
             _CountTab(label: 'New', count: _new.length, colour: NoorColors.amber),
             _CountTab(
