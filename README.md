@@ -24,7 +24,7 @@ flutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...
 
 ```bash
 flutter pub get
-flutter test          # 12 tests, all green
+flutter test          # 16 tests, all green
 flutter analyze
 flutter build apk --release
 ```
@@ -105,9 +105,32 @@ Both are worth a decision rather than an assumption.
 
 ---
 
+## The project is in INR, and some rows are inconsistent
+
+`noor-demo` was converted from USD to INR by another surface partway through
+this work: `tenants.default_currency`, the client, nine of ten styles and every
+order now read INR.
+
+**The conversion was only half applied.** On most order lines `unit_price` was
+converted while `line_total` was left at its USD figure, so
+`unit_price × pcs ≠ line_total` — out by a factor of about 85. Sharik shows the
+rate from `unit_price` and the order value from `line_total`, so an affected
+order displays a per-piece rate and a total that disagree by two orders of
+magnitude.
+
+Repaired on the five orders this app seeded (`NT-2026-0163-A` was already
+consistent): `line_total` recomputed as `unit_price × pcs`, freight and packing
+converted at 84.5, and the order rollups rebuilt.
+
+**Still broken, and not ours to fix:** `NT-2026-0184-A`, `-B`, `-C` and `-D`,
+created by the client flow. All four carry INR unit prices against USD line
+totals, and `-D` has a null `subtotal` and `total`. Whoever owns those rows
+needs to run the same repair. None is `released`, so none reaches a seller yet
+— but `-B` belongs to Zubair Garments and will surface the moment QC releases it.
+
 ## Changes made to the shared project
 
-Two, both approved before running, neither creating a schema object:
+Approved before running, none creating a schema object:
 
 **1 · Realtime was completely off.** The `supabase_realtime` publication
 contained zero tables, so no subscription in any of the three apps could ever
@@ -130,7 +153,19 @@ there was nothing to accept and nothing to prove invisibility with. Added:
 | `NT-2026-0165-A` | Zubair Garments | `proforma_issued` | **must stay invisible** — proves the status filter |
 | `NT-2026-0166-B` | Dar Al-Khuyut | `released` | **must stay invisible to Zubair** — proves the house filter |
 
-Existing rows were not modified.
+**3 · A jeans style**, because the seeded catalogue is skirts, dresses and
+abayas and there was no trouser shape to show:
+
+| Row | Detail |
+|---|---|
+| `categories` | `trousers` — no trouser category existed, and a null category would hide the style in the client's catalogue browse |
+| `styles` | `J-2204` Straight Leg Jeans, Zubair Garments, rigid denim, 340 gsm, INR 980 |
+| `colourways` | Indigo `#2E4272`, Stone Wash `#8FA0B8`, Black Rinse `#23262B` |
+| `ratio_packs` | Standard, S2 M3 L3 XL2, 10 per pack |
+| `price_lists`, `assortments` | so the style is priced and visible client-side |
+| `manufacturer_orders` | `NT-2026-0171-A`, released, 1,200 pieces |
+
+Beyond the currency repair described above, existing rows were not modified.
 
 ---
 

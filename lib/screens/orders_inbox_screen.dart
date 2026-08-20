@@ -467,14 +467,19 @@ class OrderCard extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    _Figure(
-                      label: 'PIECES',
-                      value: formatCount(order.totalPieces),
+                    Flexible(
+                      child: _Figure(
+                        label: 'PIECES',
+                        value: formatCount(order.totalPieces),
+                      ),
                     ),
-                    const SizedBox(width: NoorSpacing.xl),
-                    _Figure(
-                      label: 'VALUE',
-                      value: formatMoney(order.goodsValue, order.currency),
+                    const SizedBox(width: NoorSpacing.lg),
+                    Flexible(
+                      flex: 2,
+                      child: _Figure(
+                        label: 'VALUE',
+                        value: formatMoney(order.goodsValue, order.currency),
+                      ),
                     ),
                   ],
                 ),
@@ -582,7 +587,12 @@ class _Figure extends StatelessWidget {
       children: [
         Text(label, style: NoorText.label.copyWith(color: NoorColors.inkFaint)),
         const SizedBox(height: 2),
-        Text(value, style: NoorText.figure),
+        // Rupee order values run to seven digits; shrink rather than overflow.
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(value, style: NoorText.figure, maxLines: 1),
+        ),
       ],
     );
   }
